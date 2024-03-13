@@ -11,33 +11,25 @@ interface BrushSettings {
 }
 
 export default class Canvas {
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
-  private isCanvasReady: boolean = true;
-  private isMouseDown: boolean = false;
-  private linesData: Line[] = [];
-  private lineTypes: string[] = ['butt', 'round', 'square'];
   public brushSettings: BrushSettings = {
     size: 5,
     color: 'rgb(0,0,0)',
     lineCap: 'round'
   }
+  public lineTypes: string[] = ['butt', 'round', 'square'];
+  public canvasData: Line[] = [];
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private isCanvasReady: boolean = true;
+  private isMouseDown: boolean = false;
 
   constructor(canvasNode: HTMLCanvasElement) {
     this.canvas = canvasNode;
     this.ctx = this.canvas.getContext('2d')!;
   }
 
-  public getLinesData() {
-    return this.linesData
-  }
-
-  public flushLinesData() {
-    this.linesData.length = 0
-  }
-
-  public getLineTypes() {
-    return this.lineTypes
+  public flushCanvasData() {
+    this.canvasData.length = 0
   }
 
   public startLine(evt: MouseEvent) {
@@ -56,7 +48,7 @@ export default class Canvas {
       const currentPosition = this.getMousePos(this.canvas, evt);
       this.ctx.lineTo(currentPosition.x, currentPosition.y);
       this.ctx.stroke();
-      this.linesData.push({
+      this.canvasData.push({
         x: currentPosition.x,
         y: currentPosition.y,
         brushSettings: this.brushSettings
@@ -68,25 +60,9 @@ export default class Canvas {
     this.isMouseDown = false;
     this.isCanvasReady = true;
   }
-
-  private getMousePos(canvas: HTMLCanvasElement, evt: MouseEvent) {
-    const rect = canvas.getBoundingClientRect();
-    return {
-      x: evt.clientX - rect.left,
-      y: evt.clientY - rect.top
-    };
-  }
-
-  private drawReadyCheck(resolve) {
-    if (this.isCanvasReady) {
-      resolve(true);
-    } else {
-      setTimeout(() => { this.drawReadyCheck(resolve) }, 100);
-    }
-  } 
   
   public async renderLinesData(data: string) {
-    const isReady = await new Promise((resolve) => this.drawReadyCheck(resolve));
+    const isReady = await this.checkCanvasReady();
     const lines = JSON.parse(data);
     if (isReady) {
       this.isCanvasReady = false;
@@ -111,5 +87,25 @@ export default class Canvas {
       }
       this.isCanvasReady = true;
     }
+  }
+
+  private checkCanvasReady(): Promise<Error|true> {
+    return new Promise((resolve) => this.waitCanvasReady(resolve));
+  }
+
+  private waitCanvasReady(resolve) {
+    if (this.isCanvasReady) {
+      resolve(true);
+    } else {
+      setTimeout(() => { this.waitCanvasReady(resolve) }, 100);
+    }
+  }
+
+  private getMousePos(canvas: HTMLCanvasElement, evt: MouseEvent) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
   }
 }

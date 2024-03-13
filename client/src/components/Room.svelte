@@ -6,9 +6,9 @@
 
 	const socket: WebSocket = new WebSocket(`ws://127.0.0.1:4000/${roomId}`);
 	let isSocketReady: boolean = false;
-	let canvasEl: HTMLCanvasElement;
+	let isMounted: boolean = false;
 	let canvas: Canvas;
-	let mounted: boolean = false;
+	let canvasEl: HTMLCanvasElement;
 
 	socket.onopen = function() {
 		isSocketReady = true;
@@ -29,19 +29,18 @@
 	function mouseUp() {
 		canvas.finishLine();
 		if (isSocketReady) {
-			socket.send(JSON.stringify(canvas.getLinesData()));
-			canvas.flushLinesData();
+			socket.send(JSON.stringify(canvas.canvasData));
+			canvas.flushCanvasData();
 		}
 	}
 
 	onMount(() => {
 		canvas = new Canvas(canvasEl);
-		mounted = true;
+		isMounted = true;
 	});
-
 </script>
 
-{#if mounted}
+{#if isMounted}
 <form>
 	<label>
 		Color:
@@ -54,7 +53,7 @@
 	<label>
 		Brush:
 		<select bind:value={canvas.brushSettings.lineCap}>
-			{#each canvas.getLineTypes() as brush}
+			{#each canvas.lineTypes as brush}
 				<option value={brush}>
 					{brush}
 				</option>
@@ -74,7 +73,6 @@
 <div>
 	Room ID: {roomId}
 </div>
-
 
 <style>
 
