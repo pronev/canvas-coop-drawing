@@ -11,13 +11,13 @@ interface BrushSettings {
 }
 
 export default class Canvas {
-  public brushSettings: BrushSettings = {
+  brushSettings: BrushSettings = {
     size: 5,
     color: 'rgb(0,0,0)',
     lineCap: 'round'
   }
-  public lineTypes: string[] = ['butt', 'round', 'square'];
-  public canvasData: Line[] = [];
+  lineTypes: string[] = ['butt', 'round', 'square'];
+  canvasData: Line[] = [];
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private isCanvasReady: boolean = true;
@@ -28,11 +28,11 @@ export default class Canvas {
     this.ctx = this.canvas.getContext('2d')!;
   }
 
-  public flushCanvasData() {
+  flushCanvasData() {
     this.canvasData.length = 0
   }
 
-  public startLine(evt: MouseEvent) {
+  startLine(evt: MouseEvent) {
     const currentPosition = this.getMousePos(this.canvas, evt);
     this.isMouseDown = true;
     this.isCanvasReady = false;
@@ -43,7 +43,7 @@ export default class Canvas {
     this.ctx.lineCap = this.brushSettings.lineCap;
   }
 
-  public drawLine(evt: MouseEvent) {
+  drawLine(evt: MouseEvent) {
     if (this.isMouseDown) {
       const currentPosition = this.getMousePos(this.canvas, evt);
       this.ctx.lineTo(currentPosition.x, currentPosition.y);
@@ -56,12 +56,12 @@ export default class Canvas {
     }
   }
 
-  public finishLine() {
+  finishLine() {
     this.isMouseDown = false;
     this.isCanvasReady = true;
   }
   
-  public async renderLinesData(data: string) {
+  async renderLinesData(data: string) {
     const isReady = await this.checkCanvasReady();
     const lines = JSON.parse(data);
     if (isReady) {

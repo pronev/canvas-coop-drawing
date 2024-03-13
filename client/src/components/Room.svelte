@@ -1,20 +1,18 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Canvas from './Canvas';
+	import WS from '../api/WS';
 
 	export let roomId: string;
 
-	const socket: WebSocket = new WebSocket(`ws://127.0.0.1:4000/${roomId}`);
-	let isSocketReady: boolean = false;
+	const socket: WS = WS.getInstance();
 	let isMounted: boolean = false;
 	let canvas: Canvas;
 	let canvasEl: HTMLCanvasElement;
+	
+	socket.connect(`ws://127.0.0.1:4000/${roomId}`);
 
-	socket.onopen = function() {
-		isSocketReady = true;
-	};
-
-	socket.onmessage = async (event) => {
+	socket.onMessage = async (event) => {
 		canvas.renderLinesData(event.data);
 	};
 
@@ -28,8 +26,8 @@
 
 	function mouseUp() {
 		canvas.finishLine();
-		if (isSocketReady) {
-			socket.send(JSON.stringify(canvas.canvasData));
+		if (socket.isReady) {
+			socket.sendMessage(JSON.stringify(canvas.canvasData));
 			canvas.flushCanvasData();
 		}
 	}
