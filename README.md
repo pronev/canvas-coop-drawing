@@ -1,4 +1,4 @@
-App for collaborative drawing on HTML canvas.
+Sample app for collaborative drawing on HTML canvas. Not production ready.
 
 Enter Room ID. If Room ID exists, you will be redirected to that room, otherwise a new room will be created.
 
