@@ -1,18 +1,19 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
-import Sessions from './services/Sessions';
+import SessionRepository from './services/SessionRepository';
 
 const wss = new WebSocketServer({ port: 4000 });
+const sessionRepository = new SessionRepository();
 
-wss.on('connection', function(ws: WebSocket, request: IncomingMessage) {
+wss.on('connection', (ws: WebSocket, request: IncomingMessage) => {
 
   const id: string = request.url;
-  const session = Sessions.getInstance().add(id);
-
+  sessionRepository.save(id);
+  const session = sessionRepository.findById(id);
   session.addConnection(ws);
   session.restoreClientData(ws);
   
-  ws.on('message', function(message: string) {
+  ws.on('message', (message: string) => {
     session.broadcastData(message, ws);
   });
 
